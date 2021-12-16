@@ -123,12 +123,14 @@ module Nvar
       return if @filter_from_requests.nil? || !@filter_from_requests
 
       config.filter_sensitive_data("<#{name}>") do
+        # :nocov:
         case @filter_from_requests
         when :alone_as_basic_auth_password
           Base64.encode64(['', @value].join(':')).delete("\n")
         when true
           @value
         end
+        # :nocov:
       end
       config
     end
