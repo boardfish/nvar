@@ -67,9 +67,10 @@ module Nvar
 
       def verify_env(write_to_file: true)
         _set, unset = all
-        return true unless unset.any? && !Rails.env.test?
+        return true unless unset.any? && !(ENV['RAILS_ENV'] == 'test')
 
         puts 'Please update .env with values for each environment variable:'
+        touch_env if write_to_file
         unset.each do |variable|
           variable.add_to_env_file if write_to_file
           puts "- #{variable.name}"
@@ -115,7 +116,7 @@ module Nvar
     def add_to_env_file
       return if present_in_env_file?
 
-      File.write(ENV_FILE, "#{name}=#{value}\n", mode: 'a')
+      File.write(ENV_FILE, to_env_assign, mode: 'a')
     end
 
     def filter_from_vcr_cassettes(config)
