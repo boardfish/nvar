@@ -27,8 +27,8 @@ module Nvar
   class EnvironmentVariable
     attr_reader :name, :type, :value, :required, :defined
 
-    class_attribute :config_file_path, default: File.expand_path('config/environment_variables.yml', __dir__)
-    class_attribute :env_file_path, default: File.expand_path('.env', __dir__)
+    class_attribute :config_file_path, default: File.expand_path('config/environment_variables.yml')
+    class_attribute :env_file_path, default: File.expand_path('.env')
 
     # Comments in .env files must have a leading '#' symbol. This cannot be
     # followed by a space.
@@ -44,6 +44,9 @@ module Nvar
       def configure_for_rails(app)
         self.config_file_path = app.root.join('config/environment_variables.yml')
         self.env_file_path = app.root.join('.env')
+        [self.config_file_path, self.env_file_path].each do |path|
+          File.open(path, "w") {} unless path.exist?
+        end
       end
 
       def load_all
@@ -88,7 +91,7 @@ module Nvar
       private
 
       def variables
-        YAML.safe_load(File.read(config_file_path)).deep_symbolize_keys
+        (YAML.safe_load(File.read(config_file_path)) || {}).deep_symbolize_keys
       end
     end
 
