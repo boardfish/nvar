@@ -88,7 +88,7 @@ module Nvar
       @name = name
       @type = type
       @required = args[:required].nil? ? true : args[:required]
-      @filter_from_requests = filter_from_requests.yield_self { |f| f.in?([true, false]) ? f : f&.to_sym }
+      @filter_from_requests = filter_from_requests.yield_self { |f| [true, false].include?(f) ? f : f&.to_sym }
       @value = fetch_value(args.slice(:passthrough, :default_value))
       @defined = true
     rescue KeyError
