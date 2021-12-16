@@ -1,6 +1,16 @@
 require 'spec_helper'
 require "active_support/core_ext/hash/except"
 
+RSpec.describe Nvar::EnvironmentVariableNotPresentError do
+  subject(:error) { described_class.new(Struct.new(:name).new('TEST_ENVIRONMENT_VARIABLE'))}
+
+  describe "#message" do
+    subject { error.message }
+
+    it { is_expected.to eq("The following variables are unset or blank: TEST_ENVIRONMENT_VARIABLE")}
+  end
+end
+
 RSpec.describe Nvar::EnvironmentVariable do
   base_args = {
     name: 'TEST_ENVIRONMENT_VARIABLE',

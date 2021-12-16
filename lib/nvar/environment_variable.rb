@@ -11,13 +11,13 @@ module Nvar
   class EnvironmentVariableNotPresentError < StandardError
     attr_reader :vars
 
-    def initialize(vars)
+    def initialize(*vars)
       @vars = vars
       super
     end
 
     def message
-      "The following variables are unset or blank: #{vars.map(&:name).join(', ')} "
+      "The following variables are unset or blank: #{vars.map(&:name).join(', ')}"
     end
   end
 
@@ -43,7 +43,7 @@ module Nvar
       def load_all
         set, unset = all
         set.map(&:to_const)
-        raise EnvironmentVariableNotPresentError, unset if unset.any?
+        raise EnvironmentVariableNotPresentError, *unset if unset.any?
       end
 
       def filter_from_vcr_cassettes(config)
@@ -97,7 +97,7 @@ module Nvar
     end
 
     def to_const
-      raise EnvironmentVariableNotPresentError, [self] unless defined
+      raise EnvironmentVariableNotPresentError, self unless defined
 
       Object.const_set(name, typecast_value)
     end
