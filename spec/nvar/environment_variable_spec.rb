@@ -49,6 +49,13 @@ RSpec.describe Nvar::EnvironmentVariable do
 
   let(:env) { base_env }
 
+  describe '::filter_from_vcr_cassettes' do
+    let(:config) { VCR.configuration.dup }
+    subject(:configure) { described_class.filter_from_vcr_cassettes(config) }
+
+    it { is_expected.to be_a VCR::Configuration }
+  end
+
   describe "::load_all" do
     subject(:load_all) { described_class.load_all }
 
