@@ -1,3 +1,5 @@
+require 'simplecov'
+SimpleCov.start
 require "bundler/setup"
 require "nvar"
 require 'climate_control'
