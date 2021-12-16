@@ -1,0 +1,15 @@
+REQUIRED_ENV_VAR:
+REQUIRED_FILTERED_ENV_VAR:
+  filter_from_requests: true
+OPTIONAL_FILTERED_ENV_VAR:
+  required: false
+  filter_from_requests: true
+REQUIRED_ENV_VAR_WITH_TYPED_DEFAULT:
+  type: Integer
+  default_value: 8
+OPTIONAL_ENV_VAR:
+  required: false
+REQUIRED_ENV_VAR_WITH_DEFAULT:
+  default_value: redis://127.0.0.1:6380
+REQUIRED_BASIC_AUTH_FILTERED_ENV_VAR:
+  filter_from_requests: alone_as_basic_auth_password

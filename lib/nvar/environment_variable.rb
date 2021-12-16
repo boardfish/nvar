@@ -3,6 +3,7 @@
 # Wrapper for retrieval of environment variables. See
 # config/initializers/environment_variable_loader.rb to check out how it's used.
 require 'active_support/core_ext/hash/keys'
+require 'active_support/core_ext/object/blank'
 require 'yaml'
 
 module Nvar
@@ -13,7 +14,7 @@ module Nvar
 
     def initialize(*vars)
       @vars = vars
-      super
+      super()
     end
 
     def message
@@ -41,9 +42,10 @@ module Nvar
 
     class << self
       def load_all
-        set, unset = all
-        set.map(&:to_const)
-        raise EnvironmentVariableNotPresentError, *unset if unset.any?
+        all.tap do |set, unset|
+          set.map(&:to_const)
+          raise EnvironmentVariableNotPresentError.new(*unset) if unset.any?
+        end
       end
 
       def filter_from_vcr_cassettes(config)

@@ -12,6 +12,10 @@ RSpec.describe Nvar::EnvironmentVariableNotPresentError do
 end
 
 RSpec.describe Nvar::EnvironmentVariable do
+  before do
+    stub_const("Nvar::EnvironmentVariable::CONFIG_FILE", 'spec/fixtures/files/nvar_config.yml')
+  end
+
   base_args = {
     name: 'TEST_ENVIRONMENT_VARIABLE',
     type: 'String',
@@ -24,6 +28,42 @@ RSpec.describe Nvar::EnvironmentVariable do
   let(:args) { base_args }
 
   let(:environment_variable) { described_class.new(**args) }
+
+  describe "::load_all" do
+    subject(:load_all) { described_class.load_all }
+
+    base_env = {
+        REQUIRED_ENV_VAR: 'value',
+        REQUIRED_FILTERED_ENV_VAR: 'secret_value',
+        OPTIONAL_FILTERED_ENV_VAR: nil,
+        REQUIRED_ENV_VAR_WITH_TYPED_DEFAULT: '42',
+        OPTIONAL_ENV_VAR: nil,
+        REQUIRED_ENV_VAR_WITH_DEFAULT: 'redis://127.0.0.1:6380',
+        REQUIRED_BASIC_AUTH_FILTERED_ENV_VAR: 'secret_value'
+      }
+
+    let(:env) { base_env }
+
+    around { |example|
+      ClimateControl.modify(**env) { example.run }
+      env.keys.each { Object.send(:remove_const, _1) }
+    }
+
+    it { is_expected.to be_an Array }
+    it { is_expected.to have_attributes(size: 2) }
+    it { is_expected.to contain_exactly(
+      contain_exactly(*env.map { have_attributes(name: _1[0], value: _1[1]) }),
+      []
+    ) }
+
+    context 'when a required env var is missing' do
+      let(:env) { base_env.except(:REQUIRED_ENV_VAR) }
+
+      it 'raises an error' do
+        expect { load_all }.to raise_error Nvar::EnvironmentVariableNotPresentError, "The following variables are unset or blank: REQUIRED_ENV_VAR"
+      end
+    end
+  end
 
   describe '#initialize' do
     subject(:initializer) { environment_variable }
@@ -90,16 +130,6 @@ RSpec.describe Nvar::EnvironmentVariable do
     context 'when required is present' do
       it { is_expected.to eq(args[:required]) }
     end
-  end
-
-  describe '#filter_from_vcr_cassettes' do
-    subject { environment_variable.filter_from_vcr_cassettes }
-
-    context 'when filter_from_requests is nil'
-    context 'when filter_from_requests is false'
-    context 'when filter_from_requests is not an accepted value'
-    context 'when filter_from_requests is :alone_as_basic_auth_password'
-    context 'when filter_from_requests is true'
   end
 
   describe '#value' do
