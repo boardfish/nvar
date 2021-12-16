@@ -1,28 +1,65 @@
-# Nvar
+# `Nvar`
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/nvar`. To experiment with that code, run `bin/console` for an interactive prompt.
+If your app relies on lots of environment secrets, onboarding's tough. New team members need to add credentials for fifty different services and configure no end of app settings through their environment. Worse still, if a merged PR introduces something new, it can lead to inconvenient and unpredictable errors. **`Nvar` helps keep your team in step** by making sure all necessary environment variables are set.
 
-TODO: Delete this and the text above, and describe your gem
-
+You can use `Nvar` in Ruby apps, with out-of-the-box support provided for Rails.
 ## Installation
 
-Add this line to your application's Gemfile:
+Add the gem to your Gemfile and install it with `bundle add nvar`. If you're on Rails, that's about as much as you need to do. If you're using anything else, you'll need to make sure that `Nvar` is required with `require 'nvar'`, and then manually call `Nvar::EnvironmentVariable.load_all`.
 
-```ruby
-gem 'nvar'
+If any environment variables are missing, an error will be raised. Otherwise, all environment variables will be written to top-level constants. Using the `type` option, you can also cast them to other types such as `Integer`.
+
+## Configuration
+
+`Nvar` is configured by way of `config/environment_variables.yml`. If you're on Rails, this file will be created for you automatically. Each key corresponds to the name of a required environment variable, and houses its configuration, all of which is optional.
+
+```yml
+REQUIRED_ENV_VAR:
+  required: false # defaults to true
+  type: Integer # defaults to String
+  default_value: 8
+  filter_from_requests: true # defaults to false
+  passthrough: true # defaults to false
 ```
 
-And then execute:
+- **required** determines whether an error will be raised if the environment variable is unset during initialization.
+- **type** determines which type the variable will be cast to on load.
+- **default_value** decides the value of the environment variable if it's absent.
+- **filter_from_requests** is potentially the most exciting of the bunch - it integrates with the `vcr` gem. If your environment variable is a secret that's used directly (e.g. in bearer token authentication), use `true`. If it's used on its own as the password for basic auth, use `alone_with_basic_auth_password`. To activate the filtering, configure `VCR` as follows:
 
-    $ bundle install
+```ruby
+VCR.configure do |config|
+  Nvar::EnvironmentVariable.filter_from_vcr_cassettes(config)
+end
+```
 
-Or install it yourself as:
+Now, if you use `VCR` to record a request, that credential will be hidden using `vcr`'s `#filter_sensitive_data` hooks.
 
-    $ gem install nvar
+This is just a glimpse of `Nvar`'s greater aim - centralizing configuration for your environment variables as much as possible. Doing so enables you to onboard developers easily, and makes it easier to hide environment variables from logs and files.
 
-## Usage
+### Passthrough
 
-TODO: Write usage instructions here
+The final config option, `passthrough`, deserves some extra detail. By default, `Nvar` sets your environment constants to their actual values in development and production environments, and to their names in test environments.
+
+In production/development, or in test with passthrough active:
+
+```
+irb(main):001:0> REQUIRED_ENV_VAR
+=> "set"
+```
+
+In test:
+
+```
+irb(main):001:0> REQUIRED_ENV_VAR
+=> "REQUIRED_ENV_VAR"
+```
+
+Your tests shouldn't be reliant on your environment, so generally, you want to have `passthrough` set to `true` as little as possible. What it *is* useful for, however, is recording VCR cassettes. Set `passthrough: true` on necessary environment variables before recording VCR cassettes, then remove it and run your tests again to make sure they're not reliant on your environment.
+
+### .env files
+
+`Nvar` works well with gems like `dotenv` that source their config from a `.env` file. If an environment variable is unset when the app initializes and isn't present in `.env`, it will be added to that file. If a default value is specified in config, that will be passed to `.env` too.
 
 ## Development
 
