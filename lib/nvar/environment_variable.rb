@@ -4,6 +4,7 @@
 # config/initializers/environment_variable_loader.rb to check out how it's used.
 require 'active_support/core_ext/hash/keys'
 require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/class/attribute'
 require 'yaml'
 
 module Nvar
@@ -26,9 +27,8 @@ module Nvar
   class EnvironmentVariable
     attr_reader :name, :type, :value, :required, :defined
 
-    ENV_FILE = '.env'
-
-    CONFIG_FILE = File.expand_path('../config/environment_variables.yml', __dir__)
+    class_attribute :config_file_path, default: File.expand_path('config/environment_variables.yml', __dir__)
+    class_attribute :env_file_path, default: File.expand_path('.env', __dir__)
 
     # Comments in .env files must have a leading '#' symbol. This cannot be
     # followed by a space.
@@ -41,6 +41,11 @@ module Nvar
     COMMENT
 
     class << self
+      def configure_for_rails(app)
+        self.config_file_path = app.root.join('config/environment_variables.yml')
+        self.env_file_path = app.root.join('.env')
+      end
+
       def load_all
         all.tap do |set, unset|
           set.map(&:to_const)
@@ -62,7 +67,7 @@ module Nvar
       end
 
       def touch_env
-        File.write(ENV_FILE, ENV_COMMENT, mode: 'w') unless File.exist?(ENV_FILE)
+        File.write(env_file_path, ENV_COMMENT, mode: 'w') unless File.exist?(env_file_path)
       end
 
       def verify_env(write_to_file: true)
@@ -75,7 +80,7 @@ module Nvar
           variable.add_to_env_file if write_to_file
           puts "- #{variable.name}"
         end
-        puts "#{CONFIG_FILE} contains information on required environment variables across the app."
+        puts "#{config_file_path} contains information on required environment variables across the app."
         # Don't exit if all unset variables had defaults that were written to .env
         write_to_file && unset.all? { |variable| variable.value.present? }
       end
@@ -83,7 +88,7 @@ module Nvar
       private
 
       def variables
-        YAML.safe_load(File.read(CONFIG_FILE)).deep_symbolize_keys
+        YAML.safe_load(File.read(config_file_path)).deep_symbolize_keys
       end
     end
 
@@ -116,7 +121,7 @@ module Nvar
     def add_to_env_file
       return if present_in_env_file?
 
-      File.write(ENV_FILE, to_env_assign, mode: 'a')
+      File.write(env_file_path, to_env_assign, mode: 'a')
     end
 
     def filter_from_vcr_cassettes(config)
@@ -138,7 +143,7 @@ module Nvar
     private
 
     def present_in_env_file?
-      File.open(ENV_FILE) { |f| f.each_line.find { |line| line.start_with?("#{name}=") } }
+      File.open(env_file_path) { |f| f.each_line.find { |line| line.start_with?("#{name}=") } }
     end
 
     def to_env_assign

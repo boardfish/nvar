@@ -9,8 +9,9 @@ module Nvar
     # them to constants in the app. The EnvironmentVariable class will raise an
     # error if it can't source a required env var from the environment, and set
     # values for use during tests.
-    initializer 'nvar.load_all' do
+    config.after_initialize do |app|
       begin
+        Nvar::EnvironmentVariable.configure_for_rails(app)
         Nvar::EnvironmentVariable.load_all
       rescue Nvar::EnvironmentVariableNotPresentError => e
         raise e unless Rails.env.test?
@@ -19,6 +20,10 @@ module Nvar
           Object.const_set(var.name, var.name)
         end
       end
+    end
+
+    rake_tasks do
+      load "nvar/rails/tasks/verify_environment_file.rake"
     end
   end
 end

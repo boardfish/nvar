@@ -12,9 +12,7 @@ RSpec.describe Nvar::EnvironmentVariableNotPresentError do
 end
 
 RSpec.describe Nvar::EnvironmentVariable do
-  before do
-    stub_const("Nvar::EnvironmentVariable::CONFIG_FILE", 'spec/fixtures/files/nvar_config.yml')
-  end
+  before { described_class.config_file_path =  'spec/fixtures/files/nvar_config.yml' }
 
   base_args = {
     name: 'TEST_ENVIRONMENT_VARIABLE',
@@ -76,7 +74,7 @@ RSpec.describe Nvar::EnvironmentVariable do
   end
 
   describe "::verify_env" do
-    before { stub_const("Nvar::EnvironmentVariable::ENV_FILE", env_file.path) }
+    before { described_class.env_file_path = env_file.path }
     after { env_file.unlink }
 
     subject {

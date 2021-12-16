@@ -1,0 +1,19 @@
+#!/bin/bash
+# Exit if repo already exists
+[ -d "replicate-bug" ] && echo "Sample repo exists. Rename or remove it to begin." && exit
+branch_name=$(git rev-parse --abbrev-ref HEAD)
+# Ensure that when we install nvar in the repo, we install this copy.
+bundle config local.nvar $(pwd)
+# Create and enter a minimal example repo
+rails new --minimal replicate-bug
+cd replicate-bug
+# Add our local copy of ViewComponent
+bundle add nvar --git https://github.com/boardfish/nvar --branch $branch_name
+# Generate a controller
+rails g controller Home index
+# Root to the index action on HomeController
+cat << 'ROUTES' > 'config/routes.rb'
+Rails.application.routes.draw do
+  root to: 'home#index'
+end
+ROUTES
