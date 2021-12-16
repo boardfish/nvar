@@ -117,9 +117,9 @@ module Nvar
     end
 
     def filter_from_vcr_cassettes(config)
-      return if @filter_from_requests.blank?
+      return if @filter_from_requests.nil? || !@filter_from_requests
 
-      config.filter_sensitive_data('<PASSWORD>') do
+      config.filter_sensitive_data("<#{name}>") do
         case @filter_from_requests
         when :alone_as_basic_auth_password
           Base64.encode64(['', @value].join(':')).delete("\n")

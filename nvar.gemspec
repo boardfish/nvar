@@ -29,4 +29,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency     "activesupport", [">= 5.0.0", "< 8.0"]
   spec.add_development_dependency "byebug"
   spec.add_development_dependency "climate_control"
+  spec.add_development_dependency "vcr"
 end

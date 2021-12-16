@@ -36,6 +36,7 @@ GEM
     rspec-support (3.10.3)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
+    vcr (6.0.0)
     zeitwerk (2.5.1)
 
 PLATFORMS
@@ -47,6 +48,7 @@ DEPENDENCIES
   nvar!
   rake (~> 12.0)
   rspec (~> 3.0)
+  vcr
 
 BUNDLED WITH
    2.1.4

@@ -1,6 +1,8 @@
 require "bundler/setup"
 require "nvar"
 require 'climate_control'
+require 'vcr'
+require 'byebug'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

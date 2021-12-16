@@ -25,6 +25,39 @@ RSpec.describe Nvar::EnvironmentVariable do
     end
   end
 
+  describe '#filter_from_vcr_cassettes' do
+    let(:config) { VCR.configuration.dup }
+    subject(:configure) { environment_variable.filter_from_vcr_cassettes(config) }
+
+    context 'when filter_from_requests is nil' do
+      let(:args) { base_args.merge(filter_from_requests: nil) }
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'when filter_from_requests is false' do
+      let(:args) { base_args.merge(filter_from_requests: false) }
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'when filter_from_requests is true' do
+      let(:args) { base_args.merge(filter_from_requests: true) }
+      before { allow(config).to receive(:filter_sensitive_data) }
+
+      it { is_expected.to be_a VCR::Configuration }
+      it { configure; expect(config).to have_received(:filter_sensitive_data).with("<#{environment_variable.name}>") }
+    end
+
+    context 'when filter_from_requests is :alone_as_basic_auth_password' do
+      let(:args) { base_args.merge(filter_from_requests: :alone_as_basic_auth_password) }
+      before { allow(config).to receive(:filter_sensitive_data) }
+
+      it { is_expected.to be_a VCR::Configuration }
+      it { configure; expect(config).to have_received(:filter_sensitive_data).with("<#{environment_variable.name}>") }
+    end
+  end
+
   describe '#type' do
     subject { environment_variable.type }
 
