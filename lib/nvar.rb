@@ -42,7 +42,7 @@ module Nvar
       self.config_file_path = app.root.join('config/environment_variables.yml')
       self.env_file_path = app.root.join('.env')
       [config_file_path, env_file_path].each do |path|
-        File.open(path, 'w') {} unless path.exist?
+        File.open(path, 'w') {} unless path.exist? # rubocop:disable Lint/EmptyBlock
       end
     end
 
@@ -88,7 +88,7 @@ module Nvar
     private
 
     def all_required_env_variables_set?
-      unset.none? || ENV['RAILS_ENV'] == 'test'
+      all[1].none? || ENV['RAILS_ENV'] == 'test'
     end
 
     def variables

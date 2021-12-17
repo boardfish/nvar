@@ -19,9 +19,9 @@ RSpec.describe Nvar do
 
   around do |example|
     ClimateControl.modify(**env) { example.run }
-    env.keys.each do
-      Object.send(:remove_const, _1)
-  rescue NameError # rubocop:disable Lint/SuppressedException
+    env.each_key do |var_name|
+      Object.send(:remove_const, var_name)
+    rescue NameError # rubocop:disable Lint/SuppressedException
     end
   end
 

@@ -4,5 +4,6 @@ Metrics/BlockLength:
     - 'spec/**/*'
     - 'nvar.gemspec'
 AllCops:
+  NewCops: enable
   Exclude:
     - 'bin/**/*'

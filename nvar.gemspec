@@ -39,4 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'tempfile'
   spec.add_development_dependency 'vcr'
+  spec.metadata = {
+    'rubygems_mfa_required' => 'true'
+  }
 end
