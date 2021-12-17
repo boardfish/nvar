@@ -60,9 +60,13 @@ Your tests shouldn't be reliant on your environment, so generally, you want to h
 Now that you've been through and configured the environment variables that are necessary for your app, `Nvar` will write your environment variables to top-level constants, cast to any types you've specified, and raise an informative error if any are absent.
 ### .env files
 
-`Nvar` works well with gems like `dotenv` that source their config from a `.env` file. If an environment variable is unset when the app initializes and isn't present in `.env`, it will be added to that file. If a default value is specified in your `Nvar` config, that will be passed to `.env` too.
+`Nvar` works well with gems like `dotenv-rails` that source their config from a `.env` file. If an environment variable is unset when the app initializes and isn't present in `.env`, it will be added to that file. If a default value is specified in your `Nvar` config, that will be passed to `.env` too.
 
-When using gems such as `dotenv`, make sure you load those first so that the environment is ready for `Nvar` to check.
+When using gems such as `dotenv-rails`, make sure you load those first so that the environment is ready for `Nvar` to check.
+
+### `rake nvar:verify_environment_file`
+
+This Rake task provided by `Nvar` is super helpful for your project's developer experience. Based on what's currently in the environment, it'll show any environment variables that are missing and add declarations for them to `.env`. And if you've set a `default_value` in your config, that'll get written too.
 
 ## Development
 
