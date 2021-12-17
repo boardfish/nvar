@@ -1,7 +1,91 @@
 require 'nvar/version'
 require 'nvar/environment_variable'
 require 'nvar/engine' if defined?(Rails)
+require 'active_support/core_ext/module/attribute_accessors'
 module Nvar
+  mattr_accessor :config_file_path, default: File.expand_path('config/environment_variables.yml')
+  mattr_accessor :env_file_path, default: File.expand_path('.env')
+
+  # Comments in .env files must have a leading '#' symbol. This cannot be
+  # followed by a space.
+  ENV_COMMENT = <<~'COMMENT'
+    #Environment variables are managed through this file (.env). The Scripts to
+    #Rule Them All (in script/) load the environment from here, and the app warns
+    #on startup if any required environment variables are missing. You can see the
+    #list of environment variables that can be set for the app in
+    #config/environment_variables.yml.
+  COMMENT
+
+
   class Error < StandardError; end
-  # Your code goes here...
+
+  # Error that is raised when an environment variable is blank or unset when it is
+  # required
+  class EnvironmentVariableNotPresentError < Error
+    attr_reader :vars
+
+    def initialize(*vars)
+      @vars = vars
+      super()
+    end
+
+    def message
+      "The following variables are unset or blank: #{vars.map(&:name).join(', ')}"
+    end
+  end
+
+  class << self
+    def configure_for_rails(app)
+      self.config_file_path = app.root.join('config/environment_variables.yml')
+      self.env_file_path = app.root.join('.env')
+      [self.config_file_path, self.env_file_path].each do |path|
+        File.open(path, "w") {} unless path.exist?
+      end
+    end
+
+    def load_all
+      all.tap do |set, unset|
+        set.map(&:to_const)
+        raise EnvironmentVariableNotPresentError.new(*unset) if unset.any?
+      end
+    end
+
+    def filter_from_vcr_cassettes(config)
+      set, = all
+      set.reduce(config) do |c, env_var|
+        c.tap { env_var.filter_from_vcr_cassettes(c) }
+      end
+    end
+
+    def all
+      variables.map do |variable_name, config|
+        EnvironmentVariable.new(**(config || {}).merge(name: variable_name))
+      end.partition(&:set?)
+    end
+
+    def touch_env
+      File.write(env_file_path, ENV_COMMENT, mode: 'w') unless File.exist?(env_file_path)
+    end
+
+    def verify_env(write_to_file: true)
+      _set, unset = all
+      return true unless unset.any? && !(ENV['RAILS_ENV'] == 'test')
+
+      puts 'Please update .env with values for each environment variable:'
+      touch_env if write_to_file
+      unset.each do |variable|
+        variable.add_to_env_file if write_to_file
+        puts "- #{variable.name}"
+      end
+      puts "#{config_file_path} contains information on required environment variables across the app."
+      # Don't exit if all unset variables had defaults that were written to .env
+      write_to_file && unset.all? { |variable| variable.value.present? }
+    end
+
+    private
+
+    def variables
+      (YAML.safe_load(File.read(config_file_path)) || {}).deep_symbolize_keys
+    end
+  end
 end
