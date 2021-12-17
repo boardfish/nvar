@@ -10,8 +10,8 @@ module Nvar
     # error if it can't source a required env var from the environment, and set
     # values for use during tests.
     config.after_initialize do |app|
-      Nvar::EnvironmentVariable.configure_for_rails(app)
-      Nvar::EnvironmentVariable.load_all
+      Nvar.configure_for_rails(app)
+      Nvar.load_all
     rescue Nvar::EnvironmentVariableNotPresentError => e
       raise e unless Rails.env.test?
 
