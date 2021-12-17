@@ -3,3 +3,6 @@ Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
     - 'nvar.gemspec'
+AllCops:
+  Exclude:
+    - 'bin/**/*'
