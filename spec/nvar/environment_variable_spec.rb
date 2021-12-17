@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
-require "active_support/core_ext/hash/except"
+require 'active_support/core_ext/hash/except'
 
 RSpec.describe Nvar::EnvironmentVariableNotPresentError do
-  subject(:error) { described_class.new(Struct.new(:name).new('TEST_ENVIRONMENT_VARIABLE'))}
+  subject(:error) { described_class.new(Struct.new(:name).new('TEST_ENVIRONMENT_VARIABLE')) }
 
-  describe "#message" do
+  describe '#message' do
     subject { error.message }
 
-    it { is_expected.to eq("The following variables are unset or blank: TEST_ENVIRONMENT_VARIABLE")}
+    it { is_expected.to eq('The following variables are unset or blank: TEST_ENVIRONMENT_VARIABLE') }
   end
 end
 
@@ -56,7 +58,10 @@ RSpec.describe Nvar::EnvironmentVariable do
       before { allow(config).to receive(:filter_sensitive_data) }
 
       it { is_expected.to be_a VCR::Configuration }
-      it { configure; expect(config).to have_received(:filter_sensitive_data).with("<#{environment_variable.name}>") }
+      it {
+        configure
+        expect(config).to have_received(:filter_sensitive_data).with("<#{environment_variable.name}>")
+      }
     end
 
     context 'when filter_from_requests is :alone_as_basic_auth_password' do
@@ -64,7 +69,10 @@ RSpec.describe Nvar::EnvironmentVariable do
       before { allow(config).to receive(:filter_sensitive_data) }
 
       it { is_expected.to be_a VCR::Configuration }
-      it { configure; expect(config).to have_received(:filter_sensitive_data).with("<#{environment_variable.name}>") }
+      it {
+        configure
+        expect(config).to have_received(:filter_sensitive_data).with("<#{environment_variable.name}>")
+      }
     end
   end
 
@@ -95,7 +103,11 @@ RSpec.describe Nvar::EnvironmentVariable do
   describe '#value' do
     subject { environment_variable.value }
 
-    around { |example| ClimateControl.modify(args[:name] => 'passthrough_value', 'RAILS_ENV' => 'test') { example.run } }
+    around do |example|
+      ClimateControl.modify(args[:name] => 'passthrough_value', 'RAILS_ENV' => 'test') do
+        example.run
+      end
+    end
 
     context 'when passthrough is false and a default value is provided' do
       let(:args) { base_args.merge(passthrough: false, default_value: 'default_value') }

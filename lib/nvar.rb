@@ -1,7 +1,11 @@
+# frozen_string_literal: true
+
 require 'nvar/version'
 require 'nvar/environment_variable'
 require 'nvar/engine' if defined?(Rails)
 require 'active_support/core_ext/module/attribute_accessors'
+
+# Centralized configuration for required environment variables in your Ruby app.
 module Nvar
   mattr_accessor :config_file_path, default: File.expand_path('config/environment_variables.yml')
   mattr_accessor :env_file_path, default: File.expand_path('.env')
@@ -15,7 +19,6 @@ module Nvar
     #list of environment variables that can be set for the app in
     #config/environment_variables.yml.
   COMMENT
-
 
   class Error < StandardError; end
 
@@ -38,8 +41,8 @@ module Nvar
     def configure_for_rails(app)
       self.config_file_path = app.root.join('config/environment_variables.yml')
       self.env_file_path = app.root.join('.env')
-      [self.config_file_path, self.env_file_path].each do |path|
-        File.open(path, "w") {} unless path.exist?
+      [config_file_path, env_file_path].each do |path|
+        File.open(path, 'w') {} unless path.exist?
       end
     end
 
@@ -69,7 +72,7 @@ module Nvar
 
     def verify_env(write_to_file: true)
       _set, unset = all
-      return true unless unset.any? && !(ENV['RAILS_ENV'] == 'test')
+      return true if all_required_env_variables_set?
 
       puts 'Please update .env with values for each environment variable:'
       touch_env if write_to_file
@@ -83,6 +86,10 @@ module Nvar
     end
 
     private
+
+    def all_required_env_variables_set?
+      unset.none? || ENV['RAILS_ENV'] == 'test'
+    end
 
     def variables
       (YAML.safe_load(File.read(config_file_path)) || {}).deep_symbolize_keys

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "rails"
+require 'rails'
 require_relative './environment_variable'
 
 module Nvar
@@ -10,20 +10,18 @@ module Nvar
     # error if it can't source a required env var from the environment, and set
     # values for use during tests.
     config.after_initialize do |app|
-      begin
-        Nvar::EnvironmentVariable.configure_for_rails(app)
-        Nvar::EnvironmentVariable.load_all
-      rescue Nvar::EnvironmentVariableNotPresentError => e
-        raise e unless Rails.env.test?
+      Nvar::EnvironmentVariable.configure_for_rails(app)
+      Nvar::EnvironmentVariable.load_all
+    rescue Nvar::EnvironmentVariableNotPresentError => e
+      raise e unless Rails.env.test?
 
-        e.vars.each do |var|
-          Object.const_set(var.name, var.name)
-        end
+      e.vars.each do |var|
+        Object.const_set(var.name, var.name)
       end
     end
 
     rake_tasks do
-      load "nvar/rails/tasks/verify_environment_file.rake"
+      load 'nvar/rails/tasks/verify_environment_file.rake'
     end
   end
 end
