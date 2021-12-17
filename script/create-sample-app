@@ -1,6 +1,7 @@
 #!/bin/bash
 # Exit if repo already exists
 [ -d "replicate-bug" ] && echo "Sample repo exists. Rename or remove it to begin." && exit
+set -e
 branch_name=$(git rev-parse --abbrev-ref HEAD)
 # Ensure that when we install nvar in the repo, we install this copy.
 bundle config local.nvar $(pwd)
