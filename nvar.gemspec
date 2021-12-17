@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'byebug'
   spec.add_development_dependency 'climate_control'
   spec.add_development_dependency 'rails'
-  spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'rubocop', '~> 1.12.0'
   spec.add_development_dependency 'rubocop-rake'
   spec.add_development_dependency 'rubocop-rspec'
   spec.add_development_dependency 'simplecov'
