@@ -16,7 +16,7 @@ module Nvar
       @type = type
       @required = args[:required].nil? ? true : args[:required]
       @filter_from_requests = filter_from_requests.yield_self { |f| [true, false].include?(f) ? f : f&.to_sym }
-      @value = fetch_value(**args.slice(:passthrough, :default_value))
+      @value = fetch_value(**args.slice(:passthrough, :default_value).with_defaults(passthrough: ENV.fetch("NVAR_PASSTHROUGH", "").split(",").include?(name)))
       @defined = true
     rescue KeyError
       @value = args[:default_value]

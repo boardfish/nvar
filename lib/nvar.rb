@@ -4,6 +4,7 @@ require "nvar/version"
 require "nvar/environment_variable"
 require "nvar/engine" if defined?(Rails)
 require "active_support/core_ext/module/attribute_accessors"
+require "active_support/core_ext/hash/reverse_merge"
 
 # Centralized configuration for required environment variables in your Ruby app.
 module Nvar
@@ -62,7 +63,6 @@ module Nvar
 
     def all
       variables.map do |variable_name, config|
-        # TODO: Passthrough from environment behaviour might need to go here?
         EnvironmentVariable.new(**(config || {}).merge(name: variable_name))
       end.partition(&:set?)
     end
