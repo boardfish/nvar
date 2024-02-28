@@ -36,7 +36,7 @@ This is just a glimpse of `Nvar`'s greater aim - centralizing configuration for 
 
 ### Passthrough
 
-The final config option, `passthrough`, deserves some extra detail. By default, `Nvar` sets your environment constants to their actual values in development and production environments, and to their names in test environments.
+The final config option, `passthrough`, deserves some extra detail. By default, `Nvar` sets your environment constants to their actual values in development and production environments, and to their names in test environments, in order to prevent your tests from depending on their values.
 
 In production/development, or in test with passthrough active:
 
@@ -52,17 +52,20 @@ irb(main):001:0> REQUIRED_ENV_VAR
 => "REQUIRED_ENV_VAR"
 ```
 
-Your tests shouldn't be reliant on your environment, so generally, you want to have `passthrough` set to `true` as little as possible. What it *is* useful for, however, is recording VCR cassettes. Set `passthrough: true` on necessary environment variables before recording VCR cassettes, then remove it and run your tests again to make sure they're not reliant on your environment.
+Your tests shouldn't be reliant on your environment, so setting `passthrough` to `true` in `config/environment_variables.yml` isn't recommended. Passthrough is, however, useful for recording VCR cassettes. Set NVAR_PASSTHROUGH to a comma-separated list of environment variable names while running your tests, then unset it and run your tests again to make sure they're not reliant on your environment. For example:
 
+```
+NVAR_PASSTHROUGH=GITHUB_APP_PRIVATE_KEY,GITHUB_APP_INSTALLATION_ID bundle exec rspec
+```
 
 ## Usage
 
 Now that you've been through and configured the environment variables that are necessary for your app, `Nvar` will write your environment variables to top-level constants, cast to any types you've specified, and raise an informative error if any are absent.
 ### .env files
 
-`Nvar` works well with gems like `dotenv-rails` that source their config from a `.env` file. If an environment variable is unset when the app initializes and isn't present in `.env`, it will be added to that file. If a default value is specified in your `Nvar` config, that will be passed to `.env` too.
+`Nvar` works well with gems like `dotenv` that source their config from a `.env` file. If an environment variable is unset when the app initializes and isn't present in `.env`, it will be added to that file. If a default value is specified in your `Nvar` config, that will be passed to `.env` too.
 
-When using gems such as `dotenv-rails`, make sure you load those first so that the environment is ready for `Nvar` to check.
+When using gems such as `dotenv`, make sure you load those first so that the environment is ready for `Nvar` to check.
 
 ### `rake nvar:verify_environment_file`
 
