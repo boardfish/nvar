@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    nvar (0.2.0)
+    nvar (0.3.0)
       activesupport (>= 5.0.0, < 8.0)
 
 GEM
@@ -148,6 +148,7 @@ GEM
     parser (3.3.0.5)
       ast (~> 2.4.1)
       racc
+    prism (0.24.0)
     psych (5.1.2)
       stringio
     racc (1.7.3)
@@ -225,6 +226,12 @@ GEM
     rubocop-performance (1.20.2)
       rubocop (>= 1.48.1, < 2.0)
       rubocop-ast (>= 1.30.0, < 2.0)
+    ruby-lsp (0.14.3)
+      language_server-protocol (~> 3.17.0)
+      prism (>= 0.22.0, < 0.25)
+      sorbet-runtime (>= 0.5.10782)
+    ruby-lsp-rspec (0.1.10)
+      ruby-lsp (~> 0.14.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
     simplecov (0.22.0)
@@ -233,6 +240,7 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
+    sorbet-runtime (0.5.11276)
     standard (1.34.0)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.0)
@@ -277,6 +285,7 @@ DEPENDENCIES
   rails
   rake (~> 12.0)
   rspec (~> 3.0)
+  ruby-lsp-rspec
   simplecov
   standardrb
   tempfile

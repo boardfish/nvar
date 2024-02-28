@@ -33,6 +33,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "byebug"
   spec.add_development_dependency "climate_control"
   spec.add_development_dependency "rails"
+  spec.add_development_dependency "ruby-lsp-rspec"
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "standardrb"
   spec.add_development_dependency "tempfile"
