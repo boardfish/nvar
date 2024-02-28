@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "rails"
-require_relative "./environment_variable"
+require_relative "environment_variable"
 
 module Nvar
   class Engine < Rails::Engine # :nodoc:

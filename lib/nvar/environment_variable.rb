@@ -76,7 +76,7 @@ module Nvar
     end
 
     def fetch_value(passthrough: false, default_value: nil)
-      return (default_value || name) if ENV["RAILS_ENV"] == "test" && !passthrough
+      return default_value || name if ENV["RAILS_ENV"] == "test" && !passthrough
 
       required ? ENV.fetch(name.to_s) : ENV[name.to_s]
     end

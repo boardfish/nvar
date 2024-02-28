@@ -12,7 +12,7 @@ module Nvar
 
   # Comments in .env files must have a leading '#' symbol. This cannot be
   # followed by a space.
-  ENV_COMMENT = <<~'COMMENT'
+  ENV_COMMENT = <<~COMMENT
     #Environment variables are managed through this file (.env). The Scripts to
     #Rule Them All (in script/) load the environment from here, and the app warns
     #on startup if any required environment variables are missing. You can see the
@@ -93,7 +93,7 @@ module Nvar
     end
 
     def variables
-      (YAML.safe_load(File.read(config_file_path)) || {}).deep_symbolize_keys
+      (YAML.safe_load_file(config_file_path) || {}).deep_symbolize_keys
     end
   end
 end
