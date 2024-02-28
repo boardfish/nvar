@@ -62,6 +62,7 @@ module Nvar
 
     def all
       variables.map do |variable_name, config|
+        # TODO: Passthrough from environment behaviour might need to go here?
         EnvironmentVariable.new(**(config || {}).merge(name: variable_name))
       end.partition(&:set?)
     end
