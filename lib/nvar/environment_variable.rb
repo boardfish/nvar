@@ -2,16 +2,16 @@
 
 # Wrapper for retrieval of environment variables. See
 # config/initializers/environment_variable_loader.rb to check out how it's used.
-require 'active_support/core_ext/hash/keys'
-require 'active_support/core_ext/object/blank'
-require 'yaml'
+require "active_support/core_ext/hash/keys"
+require "active_support/core_ext/object/blank"
+require "yaml"
 
 module Nvar
   # Wrapper for loading environment variables, used across relevant Rake tasks
   class EnvironmentVariable
     attr_reader :name, :type, :value, :required, :defined
 
-    def initialize(name:, type: 'String', filter_from_requests: nil, **args)
+    def initialize(name:, type: "String", filter_from_requests: nil, **args)
       @name = name
       @type = type
       @required = args[:required].nil? ? true : args[:required]
@@ -40,7 +40,7 @@ module Nvar
     def add_to_env_file
       return if present_in_env_file?
 
-      File.write(Nvar.env_file_path, to_env_assign, mode: 'a')
+      File.write(Nvar.env_file_path, to_env_assign, mode: "a")
     end
 
     def filter_from_vcr_cassettes(config)
@@ -50,7 +50,7 @@ module Nvar
         # :nocov:
         case @filter_from_requests
         when :alone_as_basic_auth_password
-          Base64.encode64(['', @value].join(':')).delete("\n")
+          Base64.encode64(["", @value].join(":")).delete("\n")
         when true
           @value
         end
@@ -76,7 +76,7 @@ module Nvar
     end
 
     def fetch_value(passthrough: false, default_value: nil)
-      return (default_value || name) if ENV['RAILS_ENV'] == 'test' && !passthrough
+      return default_value || name if ENV["RAILS_ENV"] == "test" && !passthrough
 
       required ? ENV.fetch(name.to_s) : ENV[name.to_s]
     end

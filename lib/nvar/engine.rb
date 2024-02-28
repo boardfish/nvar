@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'rails'
-require_relative './environment_variable'
+require "rails"
+require_relative "environment_variable"
 
 module Nvar
   class Engine < Rails::Engine # :nodoc:
@@ -21,7 +21,7 @@ module Nvar
     end
 
     rake_tasks do
-      load 'nvar/rails/tasks/verify_environment_file.rake'
+      load "nvar/rails/tasks/verify_environment_file.rake"
     end
   end
 end
