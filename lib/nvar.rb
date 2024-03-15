@@ -5,11 +5,13 @@ require "nvar/environment_variable"
 require "nvar/engine" if defined?(Rails)
 require "active_support/core_ext/module/attribute_accessors"
 require "active_support/core_ext/hash/reverse_merge"
+require "active_support/string_inquirer"
 
 # Centralized configuration for required environment variables in your Ruby app.
 module Nvar
   mattr_accessor :config_file_path, default: File.expand_path("config/environment_variables.yml")
   mattr_accessor :env_file_path, default: File.expand_path(".env")
+  mattr_accessor :env, default: :development
 
   # Comments in .env files must have a leading '#' symbol. This cannot be
   # followed by a space.
@@ -39,6 +41,10 @@ module Nvar
   end
 
   class << self
+    def env
+      ActiveSupport::StringInquirer.new(@@env.to_s)
+    end
+
     def configure_for_rails(app)
       self.config_file_path = app.root.join("config/environment_variables.yml")
       self.env_file_path = app.root.join(".env")

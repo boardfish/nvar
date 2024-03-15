@@ -16,7 +16,7 @@ module Nvar
       @type = type
       @required = args[:required].nil? ? true : args[:required]
       @filter_from_requests = filter_from_requests.yield_self { |f| [true, false].include?(f) ? f : f&.to_sym }
-      @value = fetch_value(**args.slice(:passthrough, :default_value).with_defaults(passthrough: ENV.fetch("NVAR_PASSTHROUGH", "").split(",").include?(name)))
+      @value = fetch_value(**args.slice(:passthrough, :default_value).with_defaults(passthrough: ENV.fetch("NVAR_PASSTHROUGH", "").split(",").include?(name.to_s)))
       @defined = true
     rescue KeyError
       @value = args[:default_value]
@@ -76,7 +76,7 @@ module Nvar
     end
 
     def fetch_value(passthrough: false, default_value: nil)
-      return default_value || name if ENV["RAILS_ENV"] == "test" && !passthrough
+      return default_value || name.to_s.force_encoding("UTF-8") if Nvar.env.test? && !passthrough
 
       required ? ENV.fetch(name.to_s) : ENV[name.to_s]
     end
