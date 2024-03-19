@@ -76,7 +76,7 @@ module Nvar
     end
 
     def fetch_value(passthrough: false, default_value: nil)
-      return default_value || name.to_s.force_encoding("UTF-8") if Nvar.env.test? && !passthrough
+      return default_value || name.to_s if Nvar.env.test? && !passthrough
 
       required ? ENV.fetch(name.to_s) : ENV[name.to_s]
     end
