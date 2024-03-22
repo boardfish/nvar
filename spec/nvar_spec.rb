@@ -77,6 +77,8 @@ RSpec.describe Nvar do
 
     context "when the env file exists and an optional environment variable is unset" do
       let!(:env) { base_env.except(:OPTIONAL_ENV_VAR) }
+
+      it { is_expected.to be_empty }
     end
 
     context "when the env file exists and an environment variable with a default value is unset" do

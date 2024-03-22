@@ -27,6 +27,17 @@ RSpec.describe Nvar::EnvironmentVariable do
 
   let(:environment_variable) { described_class.new(**args) }
 
+  around do |example|
+    Nvar.env.then do |old_env|
+      Nvar.env = ActiveSupport::StringInquirer.new(nvar_env.to_s)
+      example.run
+    ensure
+      Nvar.env = old_env
+    end
+  end
+
+  let(:nvar_env) { :development }
+
   describe "#initialize" do
     subject(:initializer) { environment_variable }
 
@@ -112,25 +123,205 @@ RSpec.describe Nvar::EnvironmentVariable do
     context "when passthrough is false and a default value is provided" do
       let(:args) { base_args.merge(passthrough: false, default_value: "default_value") }
 
-      it { is_expected.to eq("default_value") }
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq("default_value") }
+      end
     end
 
     context "when passthrough is true and a default value is provided" do
       let(:args) { base_args.merge(passthrough: true, default_value: "default_value") }
 
-      it { is_expected.to eq("passthrough_value") }
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
     end
 
     context "when passthrough is false and a default value is not provided" do
       let(:args) { base_args.merge(passthrough: false, default_value: nil) }
 
-      it { is_expected.to eq(environment_variable.name) }
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq(environment_variable.name) }
+      end
     end
 
     context "when passthrough is true and a default value is not provided" do
       let(:args) { base_args.merge(passthrough: true, default_value: nil) }
 
-      it { is_expected.to eq("passthrough_value") }
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+    end
+
+    context "when passthrough is unset in the environment and a default value is not provided" do
+      let(:args) { base_args.except(:passthrough).merge(default_value: nil) }
+
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq(environment_variable.name) }
+      end
+    end
+
+    context "when passthrough is unset in the environment and a default value is provided" do
+      let(:args) { base_args.except(:passthrough).merge(default_value: "default_value") }
+
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq("default_value") }
+      end
+    end
+
+    context "when passthrough is enabled through the environment and a default value is provided" do
+      around { |example| ClimateControl.modify(NVAR_PASSTHROUGH: "SOME_OTHER_VAR,#{base_args[:name]}") { example.run } }
+
+      let(:args) { base_args.except(:passthrough).merge(default_value: "default_value") }
+
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+    end
+
+    context "when passthrough is enabled through the environment and a default value is not provided" do
+      around { |example| ClimateControl.modify(NVAR_PASSTHROUGH: "SOME_OTHER_VAR,#{base_args[:name]}") { example.run } }
+
+      let(:args) { base_args.except(:passthrough).merge(default_value: nil) }
+
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+    end
+
+    context "when passthrough is enabled through the environment, but is overridden by the config" do
+      around { |example| ClimateControl.modify(NVAR_PASSTHROUGH: "SOME_OTHER_VAR,#{base_args[:name]}") { example.run } }
+
+      let(:args) { base_args.merge(passthrough: false, default_value: nil) }
+
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq(environment_variable.name) }
+      end
+    end
+
+    context "when passthrough is disabled through the environment and a default value is provided" do
+      around { |example| ClimateControl.modify(NVAR_PASSTHROUGH: "SOME_OTHER_VAR") { example.run } }
+
+      let(:args) { base_args.except(:passthrough).merge(default_value: "default_value") }
+
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq("default_value") }
+      end
+    end
+
+    context "when passthrough is disabled through the environment and a default value is not provided" do
+      around { |example| ClimateControl.modify(NVAR_PASSTHROUGH: "false") { example.run } }
+
+      let(:args) { base_args.except(:passthrough).merge(default_value: nil) }
+
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq(environment_variable.name) }
+      end
+    end
+
+    context "when passthrough is disabled through the environment, but is overridden by the config" do
+      around { |example| ClimateControl.modify(NVAR_PASSTHROUGH: "SOME_OTHER_VAR") { example.run } }
+
+      let(:args) { base_args.merge(passthrough: true) }
+
+      context "and the environment is development" do
+        let(:nvar_env) { :development }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
+
+      context "and the environment is test" do
+        let(:nvar_env) { :test }
+
+        it { is_expected.to eq("passthrough_value") }
+      end
     end
   end
 end
