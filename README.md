@@ -5,7 +5,17 @@ If your app relies on lots of environment secrets, onboarding's tough. New team 
 You can use `Nvar` in Ruby apps, with out-of-the-box support provided for Rails.
 ## Installation
 
-Add the gem to your Gemfile and install it with `bundle add nvar`. If you're not on Rails, you'll need to make sure that `Nvar` is required with `require 'nvar'`, and then manually call `Nvar::EnvironmentVariable.load_all` as early as is appropriate.
+Add the gem to your Gemfile and install it with `bundle add nvar`. If you're not on Rails, you'll need to make sure that `Nvar` is required with `require 'nvar'`, and then manually call `Nvar.load_all` as early as is appropriate.
+
+It's recommended to do this by adding the following to `config/application.rb`:
+
+```rb
+require "dotenv/load" # if using in tandem with dotenv
+require "nvar"
+
+Nvar.load_all
+```
+
 ## Configuration
 
 `Nvar` is configured by way of `config/environment_variables.yml`. If you're on Rails, this file will be created for you automatically. Each key corresponds to the name of a required environment variable, and houses its configuration, all of which is optional.

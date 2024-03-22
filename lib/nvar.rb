@@ -11,7 +11,7 @@ require "active_support/string_inquirer"
 module Nvar
   mattr_accessor :config_file_path, default: File.expand_path("config/environment_variables.yml")
   mattr_accessor :env_file_path, default: File.expand_path(".env")
-  mattr_accessor :env, default: :development
+  mattr_accessor :env
 
   # Comments in .env files must have a leading '#' symbol. This cannot be
   # followed by a space.
@@ -42,7 +42,11 @@ module Nvar
 
   class << self
     def env
-      ActiveSupport::StringInquirer.new(@@env.to_s)
+      if defined?(Rails)
+        Rails.env
+      else
+        ActiveSupport::StringInquirer.new(@@env&.to_s || ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development")
+      end
     end
 
     def configure_for_rails(app)
@@ -51,6 +55,7 @@ module Nvar
       [config_file_path, env_file_path].each do |path|
         File.open(path, "w") {} unless path.exist? # rubocop:disable Lint/EmptyBlock
       end
+      self.env = Rails.env
     end
 
     def load_all

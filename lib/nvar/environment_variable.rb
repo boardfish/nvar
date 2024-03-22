@@ -26,7 +26,7 @@ module Nvar
     def to_const
       raise Nvar::EnvironmentVariableNotPresentError, self unless defined
 
-      Object.const_set(name, typecast_value)
+      Object.const_set(name, typecast_value) unless Object.const_defined?(name)
     end
 
     def set?
